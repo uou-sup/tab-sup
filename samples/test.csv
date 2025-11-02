@@ -1,0 +1,9 @@
+Month,OperatingSystems,Browser,Region,TrafficType,VisitorType,Weekend,Administrative,Administrative_Duration,Informational,Informational_Duration,ProductRelated,ProductRelated_Duration,BounceRates,ExitRates,PageValues,SpecialDay,Revenue
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,False
+Aug,1,11,3,10,Returning_Visitor,False,0.0,2720.5,0.0,2252.0334,0.0,43171.234,0.0,0.2,0.0,1.0,True
