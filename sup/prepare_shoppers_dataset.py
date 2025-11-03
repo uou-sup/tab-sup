@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 
 RAW_DATA_DIR = Path("data/shoppers")
 RAW_CSV = RAW_DATA_DIR / "online_shoppers_intention.csv"
-OUTPUT_DIR = Path("tab-sup/dataset/shoppers")
+OUTPUT_DIR = Path("dataset/shoppers")
 TARGET_COLUMN = "Revenue"
 
 CAT_COLUMNS = [

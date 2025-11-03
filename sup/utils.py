@@ -25,7 +25,7 @@ try:
 except ImportError:  # pragma: no cover - optional dependency
     zero = None  # type: ignore
 
-from . import env
+import sup.env
 
 RawConfig = Dict[str, Any]
 Report = Dict[str, Any]

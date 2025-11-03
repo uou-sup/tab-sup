@@ -9,6 +9,11 @@ from typing import Any, Dict, List, Optional, Tuple
 import torch
 from torch.utils.data import DataLoader
 
+try:
+    import wandb  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    wandb = None  # type: ignore
+
 if __package__ is None or __package__ == "":
     # Allow running as `python tab-sup/train.py` by adding project root to sys.path
     import sys
@@ -17,13 +22,13 @@ if __package__ is None or __package__ == "":
     _ROOT = _Path(__file__).resolve().parent.parent
     if str(_ROOT) not in sys.path:
         sys.path.insert(0, str(_ROOT))
-    from start import utils  # type: ignore
-    from start.data import Dataset, Transformations, prepare_torch_dataloader  # type: ignore
-    from start.ema import ExponentialMovingAverage  # type: ignore
-    from start.losses import get_optimizer, get_step_fn, optimization_manager  # type: ignore
-    from start.model import modules as model_modules  # type: ignore
-    from start.noise_lib import get_noise  # type: ignore
-    from start.pipeline import prepare_dataset_and_graph  # type: ignore
+    from sup import utils  # type: ignore
+    from data import Dataset, Transformations, prepare_torch_dataloader  # type: ignore
+    from sup.ema import ExponentialMovingAverage  # type: ignore
+    from sup.losses import get_optimizer, get_step_fn, optimization_manager  # type: ignore
+    from sup.model import modules as model_modules  # type: ignore
+    from sup.noise_lib import get_noise  # type: ignore
+    from sup.pipeline import prepare_dataset_and_graph  # type: ignore
 else:
     from . import utils
     from .data import Dataset, Transformations, prepare_torch_dataloader
@@ -101,6 +106,9 @@ class TrainLoopConfig:
     max_steps: Optional[int] = None
     seed: int = 0
     device: Optional[str] = None
+    use_wandb: bool = False
+    wandb_project: Optional[str] = None
+    wandb_run_name: Optional[str] = None
 
 
 @dataclass
@@ -285,7 +293,20 @@ def train(config: Config) -> None:
         "ema": ema,
         "scaler": scaler,
         "step": 0,
+        "last_grad_norm": None,
+        "last_lr": None,
     }
+
+    wandb_run = None
+    if config.train.use_wandb:
+        if wandb is None:
+            raise ImportError("wandb is requested but not installed. Install it with `pip install wandb`.")
+        wandb_run = wandb.init(
+            project=config.train.wandb_project or "tab-sup",
+            name=config.train.wandb_run_name,
+            config=asdict(config),
+        )
+        wandb.watch(model, log="gradients", log_freq=config.train.log_every)
 
     if config.train.resume:
         resume_path = Path(config.train.resume)
@@ -348,6 +369,17 @@ def train(config: Config) -> None:
                         f"loss: {loss.item():.4f} | "
                         f"normalized: {normalized_loss.item():.4f}"
                     )
+                    if config.train.use_wandb and wandb_run is not None:
+                        log_data = {
+                            "train/loss": loss.item(),
+                            "train/normalized_loss": normalized_loss.item(),
+                            "train/epoch": epoch,
+                        }
+                        if state["last_lr"] is not None:
+                            log_data["train/lr"] = state["last_lr"]
+                        if state["last_grad_norm"] is not None:
+                            log_data["train/grad_norm"] = state["last_grad_norm"]
+                        wandb.log(log_data, step=state["step"])
 
                 if (
                     eval_step_fn is not None
@@ -359,6 +391,14 @@ def train(config: Config) -> None:
                     if val_loss < best_val:
                         best_val = val_loss
                         best_epoch = epoch
+                    if config.train.use_wandb and wandb_run is not None:
+                        wandb.log(
+                            {
+                                "val/loss": val_loss,
+                                "val/epoch": epoch,
+                            },
+                            step=state["step"],
+                        )
 
                 if (
                     config.train.checkpoint_every > 0
@@ -380,6 +420,14 @@ def train(config: Config) -> None:
             if val_loss < best_val:
                 best_val = val_loss
                 best_epoch = epoch
+            if config.train.use_wandb and wandb_run is not None:
+                wandb.log(
+                    {
+                        "val/loss": val_loss,
+                        "val/epoch": epoch,
+                    },
+                    step=state["step"],
+                )
 
         if config.train.checkpoint_dir:
             ckpt_path = Path(config.train.checkpoint_dir) / f"epoch_{epoch:04d}.pt"
@@ -391,6 +439,8 @@ def train(config: Config) -> None:
             print(f"Best validation loss: {best_val:.4f} at epoch {best_epoch}")
         else:
             print(f"Best validation loss: {best_val:.4f}")
+    if wandb_run is not None:
+        wandb_run.finish()
 
 
 def parse_args() -> argparse.Namespace:

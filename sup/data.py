@@ -34,9 +34,9 @@ from category_encoders import LeaveOneOutEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, QuantileTransformer, MinMaxScaler
 from scipy.spatial.distance import cdist
-from . import utils
+import sup.utils as utils
 
-from .utils import TaskType, load_json
+from sup.utils import TaskType, load_json
 
 ArrayDict = Dict[str, np.array]
 TensorDict = Dict[str, torch.Tensor]

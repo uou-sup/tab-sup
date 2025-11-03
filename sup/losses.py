@@ -114,6 +114,20 @@ def get_optimizer(config, params):
     return optimizer
 
 
+def _compute_grad_norm(parameters):
+    total_norm_sq = 0.0
+    for param in parameters:
+        if param.grad is None:
+            continue
+        if param.grad.is_sparse:
+            grad = param.grad.coalesce().values()
+        else:
+            grad = param.grad
+        param_norm = grad.norm(2).item()
+        total_norm_sq += param_norm * param_norm
+    return float(total_norm_sq ** 0.5)
+
+
 def optimization_manager(config):
     """Returns an optimize_fn based on `config`."""
 
@@ -126,15 +140,28 @@ def optimization_manager(config):
                     grad_clip=config.optim.grad_clip):
         """Optimizes with warmup and gradient clipping (disabled if negative)."""
         scaler.unscale_(optimizer)
+        params_list = list(params)
 
         if warmup > 0:
             for g in optimizer.param_groups:
                 g['lr'] = lr * np.minimum(step / warmup, 1.0)
-        if grad_clip >= 0:
-            torch.nn.utils.clip_grad_norm_(params, max_norm=grad_clip)
+        if params_list:
+            if grad_clip >= 0:
+                grad_norm = torch.nn.utils.clip_grad_norm_(params_list, max_norm=grad_clip)
+                grad_norm_value = float(grad_norm.item())
+            else:
+                grad_norm_value = _compute_grad_norm(params_list)
+        else:
+            grad_norm_value = None
 
         scaler.step(optimizer)
         scaler.update()
+
+        current_lr = optimizer.param_groups[0]['lr'] if optimizer.param_groups else None
+        return {
+            'grad_norm': grad_norm_value,
+            'lr': float(current_lr) if current_lr is not None else None,
+        }
 
     return optimize_fn
 
@@ -164,8 +191,11 @@ def get_step_fn(noise, graph, train, optimize_fn, accum):
                 accum_iter = 0
 
                 state['step'] += 1
-                optimize_fn(optimizer, scaler, model.parameters(), step=state['step'])
-                state['ema'].update(model.parameters())
+                params = [param for param in model.parameters()]
+                metrics = optimize_fn(optimizer, scaler, params, step=state['step'])
+                state['last_grad_norm'] = metrics.get('grad_norm')
+                state['last_lr'] = metrics.get('lr')
+                state['ema'].update(params)
                 optimizer.zero_grad()
 
                 loss = total_loss
