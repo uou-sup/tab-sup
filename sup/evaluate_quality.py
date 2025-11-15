@@ -7,6 +7,11 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wasserstein_distance
 
+try:
+    import wandb  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    wandb = None  # type: ignore
+
 
 def load_info(info_path: Optional[Path]) -> Dict[str, List[str]]:
     if info_path is None or not info_path.exists():
@@ -165,11 +170,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--synthetic", type=Path, required=True, help="Path to synthetic CSV file.")
     parser.add_argument("--info", type=Path, default=None, help="Optional info.json with column metadata.")
     parser.add_argument("--output", type=Path, default=None, help="Optional path to save metrics JSON.")
+    parser.add_argument("--use-wandb", action="store_true", help="Log evaluation metrics to Weights & Biases.")
+    parser.add_argument("--wandb-project", type=str, default=None, help="Optional WandB project name.")
+    parser.add_argument("--wandb-run-name", type=str, default=None, help="Optional WandB run name.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+
+    wandb_run = None
+    if args.use_wandb:
+        if wandb is None:
+            raise ImportError("wandb is requested but not installed. Install it with `pip install wandb`.")
+        wandb_run = wandb.init(
+            project=args.wandb_project or "tab-sup",
+            name=args.wandb_run_name,
+            job_type="evaluation",
+            config={
+                "real_path": str(args.real),
+                "synthetic_path": str(args.synthetic),
+                "info_path": str(args.info) if args.info else None,
+            },
+        )
 
     real_df = pd.read_csv(args.real)
     synth_df = pd.read_csv(args.synthetic)
@@ -188,6 +211,27 @@ def main() -> None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(metrics, indent=2))
         print(f"\nSaved metrics to {args.output}")
+
+    if wandb_run is not None:
+        flattened = {}
+        for section, values in metrics.items():
+            for key, value in values.items():
+                flattened[f"{section}/{key}"] = value
+        wandb.log(flattened)
+
+        artifact = wandb.Artifact(
+            name=f"evaluation-{args.synthetic.stem}-{wandb_run.id}",
+            type="evaluation",
+            description="Tab-sup synthetic data evaluation inputs and outputs",
+        )
+        artifact.add_file(str(args.real))
+        artifact.add_file(str(args.synthetic))
+        if args.output:
+            artifact.add_file(str(args.output))
+        if args.info and args.info.exists():
+            artifact.add_file(str(args.info))
+        wandb.log_artifact(artifact)
+        wandb_run.finish()
 
 
 if __name__ == "__main__":

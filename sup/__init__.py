@@ -44,3 +44,10 @@ __all__ = [
     "decode_block_uniform_tokens",
     "decoded_to_dataframe",
 ]
+
+# Backwards compatibility for cached pickles created when the project used
+# `import data` instead of the package-qualified `import sup.data`.
+import sys as _sys
+from . import data as _sup_data
+
+_sys.modules.setdefault("data", _sup_data)

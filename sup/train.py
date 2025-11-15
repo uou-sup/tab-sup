@@ -109,6 +109,8 @@ class TrainLoopConfig:
     use_wandb: bool = False
     wandb_project: Optional[str] = None
     wandb_run_name: Optional[str] = None
+    wandb_start_method: Optional[str] = None
+    wandb_mode: Optional[str] = None
 
 
 @dataclass
@@ -267,18 +269,40 @@ def train(config: Config) -> None:
     set_seed(config.train.seed)
 
     device = _resolve_device(config.train.device)
+    wandb_run = None
+    if config.train.use_wandb:
+        if wandb is None:
+            raise ImportError("wandb is requested but not installed. Install it with `pip install wandb`.")
+        wandb_settings = None
+        settings_kwargs = {}
+        if config.train.wandb_start_method:
+            settings_kwargs["start_method"] = config.train.wandb_start_method
+        if config.train.wandb_mode:
+            settings_kwargs["mode"] = config.train.wandb_mode
+        if settings_kwargs:
+            wandb_settings = wandb.Settings(**settings_kwargs)
+        wandb_run = wandb.init(
+            project=config.train.wandb_project or "tab-sup",
+            name=config.train.wandb_run_name,
+            config=asdict(config),
+            settings=wandb_settings,
+        )
+
     dataset, graph = prepare_dataset_and_graph(
         config,
         config.dataset.path,
         config.transformations,
         device,
         cache=config.dataset.cache,
+        log_to_wandb=wandb_run is not None,
     )
 
     train_loader, val_loader = _get_dataloaders(dataset, config.dataset)
     cat_dim = graph.dim if dataset.X_cat is not None else 0
     input_dim = dataset.n_num_features + cat_dim
     model = build_model(config.model, dataset, input_dim).to(device)
+    if wandb_run is not None:
+        wandb.watch(model, log="gradients", log_freq=config.train.log_every)
 
     num_numerical = dataset.n_num_features if dataset.n_num_features > 0 else None
     noise = get_noise(config.noise, config.numeric_noise, num_numerical=num_numerical)
@@ -296,17 +320,6 @@ def train(config: Config) -> None:
         "last_grad_norm": None,
         "last_lr": None,
     }
-
-    wandb_run = None
-    if config.train.use_wandb:
-        if wandb is None:
-            raise ImportError("wandb is requested but not installed. Install it with `pip install wandb`.")
-        wandb_run = wandb.init(
-            project=config.train.wandb_project or "tab-sup",
-            name=config.train.wandb_run_name,
-            config=asdict(config),
-        )
-        wandb.watch(model, log="gradients", log_freq=config.train.log_every)
 
     if config.train.resume:
         resume_path = Path(config.train.resume)

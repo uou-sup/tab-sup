@@ -18,6 +18,7 @@ import __main__
 import numpy as np
 import tomli
 import tomli_w
+import yaml
 import torch
 
 try:
@@ -127,15 +128,32 @@ def pack_config(config: RawConfig) -> RawConfig:
 
 
 def load_config(path: Union[Path, str]) -> Any:
-    with open(path, 'rb') as f:
-        return unpack_config(tomli.load(f))
+    path = Path(path)
+    suffix = path.suffix.lower()
+    if suffix == '.toml':
+        with path.open('rb') as f:
+            data = tomli.load(f)
+        return unpack_config(data)
+    elif suffix in {'.yaml', '.yml'}:
+        with path.open('r', encoding='utf-8') as f:
+            data = yaml.safe_load(f) or {}
+        return data
+    else:
+        raise ValueError(f"Unsupported config format: {suffix}")
 
 
 def dump_config(config: Any, path: Union[Path, str]) -> None:
-    with open(path, 'wb') as f:
-        tomli_w.dump(pack_config(config), f)
-    # check that there are no bugs in all these "pack/unpack" things
-    assert config == load_config(path)
+    path = Path(path)
+    suffix = path.suffix.lower()
+    if suffix == '.toml':
+        with path.open('wb') as f:
+            tomli_w.dump(pack_config(config), f)
+        assert config == load_config(path)
+    elif suffix in {'.yaml', '.yml'}:
+        with path.open('w', encoding='utf-8') as f:
+            yaml.safe_dump(config, f, sort_keys=False)
+    else:
+        raise ValueError(f"Unsupported config format: {suffix}")
 
 
 def load_json(path: Union[Path, str], **kwargs) -> Any:

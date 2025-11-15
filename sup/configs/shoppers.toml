@@ -58,6 +58,11 @@ checkpoint_dir = "sup/checkpoints/shoppers"
 ema_decay = 0.999
 seed = 777
 max_steps = 0
+use_wandb = true
+wandb_project = "tab-sup"
+wandb_run_name = "__none__"
+wandb_start_method = "__none__"
+wandb_mode = "__none__"
 
 [sampling]
 predictor = "analytic"

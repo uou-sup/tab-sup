@@ -16,6 +16,11 @@ from .sampling import (
 from .train import Config, build_model, GenerationConfig
 from .utils import TaskType
 
+try:
+    import wandb  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    wandb = None  # type: ignore
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -51,6 +56,23 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Override device string (default: auto cuda/cpu detection).",
     )
+    parser.add_argument(
+        "--use-wandb",
+        action="store_true",
+        help="Log sampling metadata, previews, and CSV artifacts to Weights & Biases.",
+    )
+    parser.add_argument(
+        "--wandb-project",
+        type=str,
+        default=None,
+        help="Optional WandB project name (defaults to 'tab-sup').",
+    )
+    parser.add_argument(
+        "--wandb-run-name",
+        type=str,
+        default=None,
+        help="Optional WandB run name.",
+    )
     return parser.parse_args()
 
 
@@ -75,12 +97,30 @@ def main() -> None:
     output_path = args.output or (Path(generation_cfg.output) if generation_cfg.output else Path("samples/generated.csv"))
     output_path = Path(output_path)
 
+    wandb_run = None
+    if args.use_wandb:
+        if wandb is None:
+            raise ImportError("wandb is requested but not installed. Install it with `pip install wandb`.")
+        wandb_run = wandb.init(
+            project=args.wandb_project or "tab-sup",
+            name=args.wandb_run_name,
+            job_type="sampling",
+            config={
+                "num_samples": num_samples,
+                "sampling_steps": config.sampling.steps,
+                "sampling_predictor": config.sampling.predictor,
+                "checkpoint": str(checkpoint_path),
+                "generation_numeric_clip": generation_cfg.numeric_clip,
+            },
+        )
+
     dataset, graph = prepare_dataset_and_graph(
         config,
         config.dataset.path,
         config.transformations,
         device,
         cache=config.dataset.cache,
+        log_to_wandb=wandb_run is not None,
     )
 
     input_dim = graph.dim + dataset.n_num_features
@@ -176,6 +216,26 @@ def main() -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
     print(f"Saved {len(df)} samples to {output_path}")
+
+    if wandb_run is not None:
+        preview = df.head(min(len(df), 50))
+        log_payload = {
+            "sampling/num_samples": len(df),
+            "sampling/checkpoint": str(checkpoint_path),
+        }
+        if not preview.empty:
+            log_payload["sampling/preview"] = wandb.Table(dataframe=preview)
+        wandb.log(log_payload)
+
+        artifact_name = f"samples-{output_path.stem}-{wandb_run.id}"
+        artifact = wandb.Artifact(
+            name=artifact_name,
+            type="generated-data",
+            description="Synthetic samples generated via tab-sup",
+        )
+        artifact.add_file(str(output_path))
+        wandb.log_artifact(artifact)
+        wandb_run.finish()
 
 
 if __name__ == "__main__":
