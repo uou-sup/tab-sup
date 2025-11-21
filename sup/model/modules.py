@@ -500,3 +500,98 @@ class ResNetDiffusion(nn.Module):
 
         h = x.float() + self.embed_proj(emb)
         return self.resnet(h)
+
+
+class MLPDiffusionTest(nn.Module):
+    def __init__(self, d_in, num_classes, is_y_cond, rtdl_params, dim_t=128):
+        super().__init__()
+        self.input_dim = d_in  # F = feature count
+        self.dim_t = dim_t
+        self.num_classes = num_classes
+        self.is_y_cond = is_y_cond
+
+        # 1) Column Tokenizer
+        # tabular feature 각각 하나씩 token으로 취급
+
+        self.d_embed = 32  # column embedding dimension (작게 유지)
+        # 컬럼 인덱스에 대해 그 컬럼을 대표하는 토큰 벡터 생성
+        self.column_emb = nn.Parameter(
+            torch.randn(d_in, self.d_embed) * 0.02
+        )  # shape: [F, d_embed]
+
+        # 2) Transformer Encoder
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=self.d_embed,
+            nhead=4,
+            dim_feedforward=128,
+            batch_first=True,
+            activation="gelu",
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=2)
+
+        # 3) 기존 MLP Head
+
+        # transformer output shape = [B, F, d_embed] → flatten = F*d_embed
+        rtdl_params = dict(rtdl_params)
+        rtdl_params['d_in'] = d_in * self.d_embed + dim_t  # (token + time_embed)
+        rtdl_params['d_out'] = d_in
+        self.mlp = MLP.make_baseline(**rtdl_params)
+
+        # 4) Label 조건 포함
+        if self.num_classes > 0 and is_y_cond:
+            self.label_emb = nn.Embedding(self.num_classes, dim_t)
+        elif self.num_classes == 0 and is_y_cond:
+            self.label_emb = nn.Linear(1, dim_t)
+        else:
+            self.label_emb = None
+
+        # 5) Time embedding
+        self.time_embed = nn.Sequential(
+            nn.Linear(dim_t, dim_t),
+            nn.SiLU(),
+            nn.Linear(dim_t, dim_t)
+        )
+
+    def forward(self, x, timesteps, y=None):
+        """
+        x : [B, F]
+        """
+        B, F = x.shape
+        device = x.device
+
+        # Step 1: Time embedding
+
+        emb = self.time_embed(timestep_embedding(timesteps, self.dim_t))
+
+        if self.is_y_cond and y is not None:
+            if self.num_classes > 0:
+                y = y.squeeze()
+                emb += F.silu(self.label_emb(y))
+            else:
+                y = y.reshape(B, 1).float()
+                emb += F.silu(self.label_emb(y))
+
+        # Step 2: Column Tokenizer
+
+        # column_emb: [F, d]
+        # expand → [B, F, d]
+        col_tok = self.column_emb.unsqueeze(0).expand(B, -1, -1)
+
+        # continuous value injection (작게 scaling)
+        col_tok = col_tok + x.unsqueeze(-1) * 0.01
+
+        # Step 3: Transformer Encoding (column-wise)
+
+        h = self.transformer(col_tok)  # [B, F, d_embed]
+
+        # Step 4: Flatten tokens
+
+        h = h.reshape(B, F * self.d_embed)
+
+        # Step 5: concat transformer_output + time_embedding
+
+        h = torch.cat([h, emb], dim=-1)
+
+        # Step 6: feed into MLP score head
+
+        return self.mlp(h)

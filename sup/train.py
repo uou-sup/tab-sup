@@ -340,6 +340,17 @@ def train(config: Config) -> None:
 
     best_val = math.inf
     best_epoch = None
+
+    def maybe_save_best(val_loss: float, epoch_idx: int) -> None:
+        nonlocal best_val, best_epoch
+        if val_loss >= best_val:
+            return
+        best_val = val_loss
+        best_epoch = epoch_idx
+        if config.train.checkpoint_dir:
+            ckpt_path = Path(config.train.checkpoint_dir) / "best.pt"
+            save_checkpoint(ckpt_path, state, config, epoch_idx)
+            print(f"Saved new best checkpoint (epoch {epoch_idx}, loss {val_loss:.4f})")
     steps_per_epoch = math.ceil(len(dataset.y["train"]) / config.dataset.batch_size)
 
     for epoch in range(start_epoch, config.train.epochs):
@@ -402,8 +413,7 @@ def train(config: Config) -> None:
                     val_loss = evaluate(val_loader, eval_step_fn, state, device)
                     print(f"Validation at step {state['step']}: loss {val_loss:.4f}")
                     if val_loss < best_val:
-                        best_val = val_loss
-                        best_epoch = epoch
+                        maybe_save_best(val_loss, epoch)
                     if config.train.use_wandb and wandb_run is not None:
                         wandb.log(
                             {
@@ -431,8 +441,7 @@ def train(config: Config) -> None:
             val_loss = evaluate(val_loader, eval_step_fn, state, device)
             print(f"[epoch {epoch}] Validation loss: {val_loss:.4f}")
             if val_loss < best_val:
-                best_val = val_loss
-                best_epoch = epoch
+                maybe_save_best(val_loss, epoch)
             if config.train.use_wandb and wandb_run is not None:
                 wandb.log(
                     {
@@ -441,10 +450,6 @@ def train(config: Config) -> None:
                     },
                     step=state["step"],
                 )
-
-        if config.train.checkpoint_dir:
-            ckpt_path = Path(config.train.checkpoint_dir) / f"epoch_{epoch:04d}.pt"
-            save_checkpoint(ckpt_path, state, config, epoch)
 
     print("Training finished.")
     if val_loader is not None:
