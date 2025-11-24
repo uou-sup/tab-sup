@@ -1,0 +1,249 @@
+{
+  "name": "adult",
+  "task_type": "binclass",
+  "header": "infer",
+  "column_names": [
+    "age",
+    "workclass",
+    "fnlwgt",
+    "education",
+    "education_num",
+    "marital_status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "capital_gain",
+    "capital_loss",
+    "hours_per_week",
+    "native_country",
+    "income"
+  ],
+  "num_col_idx": [
+    0,
+    2,
+    4,
+    10,
+    11,
+    12
+  ],
+  "cat_col_idx": [
+    1,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    13
+  ],
+  "target_col_idx": [
+    14
+  ],
+  "file_type": "csv",
+  "data_path": "data/adult/train.csv",
+  "val_path": null,
+  "test_path": "data/adult/test.csv",
+  "int_col_idx": [
+    0,
+    2,
+    4,
+    10,
+    11,
+    12
+  ],
+  "int_columns": [
+    "age",
+    "fnlwgt",
+    "education_num",
+    "capital_gain",
+    "capital_loss",
+    "hours_per_week"
+  ],
+  "int_col_idx_wrt_num": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "column_info": {
+    "0": {
+      "type": "numerical",
+      "min": 17.0,
+      "max": 90.0
+    },
+    "1": {
+      "type": "categorical"
+    },
+    "2": {
+      "type": "numerical",
+      "min": 12285.0,
+      "max": 1490400.0
+    },
+    "3": {
+      "type": "categorical"
+    },
+    "4": {
+      "type": "numerical",
+      "min": 1.0,
+      "max": 16.0
+    },
+    "5": {
+      "type": "categorical"
+    },
+    "6": {
+      "type": "categorical"
+    },
+    "7": {
+      "type": "categorical"
+    },
+    "8": {
+      "type": "categorical"
+    },
+    "9": {
+      "type": "categorical"
+    },
+    "10": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 99999.0
+    },
+    "11": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 4356.0
+    },
+    "12": {
+      "type": "numerical",
+      "min": 1.0,
+      "max": 99.0
+    },
+    "13": {
+      "type": "categorical"
+    },
+    "14": {
+      "type": "categorical"
+    }
+  },
+  "train_num": 32561,
+  "test_num": 16281,
+  "val_num": 0,
+  "idx_mapping": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+  },
+  "inverse_idx_mapping": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+  },
+  "idx_name_mapping": {
+    "0": "age",
+    "1": "workclass",
+    "2": "fnlwgt",
+    "3": "education",
+    "4": "education_num",
+    "5": "marital_status",
+    "6": "occupation",
+    "7": "relationship",
+    "8": "race",
+    "9": "sex",
+    "10": "capital_gain",
+    "11": "capital_loss",
+    "12": "hours_per_week",
+    "13": "native_country",
+    "14": "income"
+  },
+  "metadata": {
+    "columns": {
+      "0": {
+        "sdtype": "numerical",
+        "name": "age"
+      },
+      "1": {
+        "sdtype": "categorical",
+        "name": "workclass"
+      },
+      "2": {
+        "sdtype": "numerical",
+        "name": "fnlwgt"
+      },
+      "3": {
+        "sdtype": "categorical",
+        "name": "education"
+      },
+      "4": {
+        "sdtype": "numerical",
+        "name": "education_num"
+      },
+      "5": {
+        "sdtype": "categorical",
+        "name": "marital_status"
+      },
+      "6": {
+        "sdtype": "categorical",
+        "name": "occupation"
+      },
+      "7": {
+        "sdtype": "categorical",
+        "name": "relationship"
+      },
+      "8": {
+        "sdtype": "categorical",
+        "name": "race"
+      },
+      "9": {
+        "sdtype": "categorical",
+        "name": "sex"
+      },
+      "10": {
+        "sdtype": "numerical",
+        "name": "capital_gain"
+      },
+      "11": {
+        "sdtype": "numerical",
+        "name": "capital_loss"
+      },
+      "12": {
+        "sdtype": "numerical",
+        "name": "hours_per_week"
+      },
+      "13": {
+        "sdtype": "categorical",
+        "name": "native_country"
+      },
+      "14": {
+        "sdtype": "categorical",
+        "name": "income"
+      }
+    },
+    "problem_type": "classification"
+  }
+}

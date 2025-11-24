@@ -360,11 +360,13 @@ def sample_block_uniform(
         t_curr = timesteps[idx]
         t_next = timesteps[idx + 1]
         t_batch = t_curr * torch.ones(num_samples, 1, device=device)
-        sigma_cat_curr = noise(t_batch)[0]
-        sigma_cat_next = noise(t_next * torch.ones(num_samples, 1, device=device))[0]
+        sigma_cat_curr = noise(t_batch)[0].to(device)
+        sigma_cat_next = noise(t_next * torch.ones(num_samples, 1, device=device))[0].to(device)
         if hasattr(noise, "numeric_schedule"):
             sigma_num_curr, _ = noise.numeric_schedule(t_batch)
             sigma_num_next, _ = noise.numeric_schedule(t_next * torch.ones(num_samples, 1, device=device))
+            sigma_num_curr = sigma_num_curr.to(device)
+            sigma_num_next = sigma_num_next.to(device)
         else:
             sigma_num_curr = sigma_cat_curr
             sigma_num_next = sigma_cat_next
@@ -386,16 +388,17 @@ def sample_block_uniform(
 
         delta_sigma_sq = match_numeric_shape(delta_sigma_sq)
         noise_scale = torch.sqrt(delta_sigma_sq + 1e-12)
-        stochastic_term = noise_scale * torch.randn_like(numeric_state)
+        stochastic_term = noise_scale.to(device) * torch.randn_like(numeric_state)
         numeric_state = numeric_state + delta_sigma_sq * numeric_scores + stochastic_term
         if numeric_clip is not None and numeric_clip > 0:
             numeric_state = torch.clamp(numeric_state, -numeric_clip, numeric_clip)
 
     if denoise:
         t_final = timesteps[-1] * torch.ones(num_samples, 1, device=device)
-        sigma_cat_final = noise(t_final)[0]
+        sigma_cat_final = noise(t_final)[0].to(device)
         if hasattr(noise, "numeric_schedule"):
             sigma_num_final, _ = noise.numeric_schedule(t_final)
+            sigma_num_final = sigma_num_final.to(device)
         else:
             sigma_num_final = sigma_cat_final
         tokens = projector(tokens)

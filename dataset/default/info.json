@@ -1,0 +1,62 @@
+{
+  "task_type": "binclass",
+  "n_classes": 2,
+  "n_num_features": 8,
+  "n_cat_features": 15,
+  "train_size": 21600,
+  "val_size": 2400,
+  "test_size": 6000,
+  "cat_group_sizes": [
+    2,
+    7,
+    4,
+    11,
+    11,
+    11,
+    11,
+    10,
+    10,
+    6495,
+    6400,
+    6152,
+    5663,
+    5635,
+    5669
+  ],
+  "categorical_columns": [
+    "sex",
+    "education",
+    "marriage",
+    "pay_0",
+    "pay_2",
+    "pay_3",
+    "pay_4",
+    "pay_5",
+    "pay_6",
+    "pay_amt1",
+    "pay_amt2",
+    "pay_amt3",
+    "pay_amt4",
+    "pay_amt5",
+    "pay_amt6"
+  ],
+  "numeric_columns": [
+    "limit_bal",
+    "age",
+    "bill_amt1",
+    "bill_amt2",
+    "bill_amt3",
+    "bill_amt4",
+    "bill_amt5",
+    "bill_amt6"
+  ],
+  "target": "default_payment_next_month",
+  "target_classes": [
+    "0",
+    "1"
+  ],
+  "random_state": 777,
+  "val_ratio": 0.08,
+  "test_ratio": 0.2,
+  "name": "default"
+}

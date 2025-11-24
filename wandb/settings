@@ -1,0 +1,5 @@
+[default]
+entity = sosscvs-university-of-ulsan
+project = tab-sup
+base_url = https://api.wandb.ai
+

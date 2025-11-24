@@ -80,7 +80,14 @@ def main() -> None:
     args = parse_args()
 
     config = utils.from_dict(Config, utils.load_config(args.config))
-    device_str = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
+    device_str = args.device
+    if device_str is None:
+        if torch.cuda.is_available():
+            device_str = "cuda"
+        elif torch.backends.mps.is_available():
+            device_str = "mps"
+        else:
+            device_str = "cpu"
     device = torch.device(device_str)
 
     generation_cfg: GenerationConfig = config.generation or GenerationConfig()
@@ -126,7 +133,13 @@ def main() -> None:
     input_dim = graph.dim + dataset.n_num_features
     model = build_model(config.model, dataset, input_dim).to(device)
     num_numerical = dataset.n_num_features if dataset.n_num_features > 0 else None
-    noise = get_noise(config.noise, config.numeric_noise, num_numerical=num_numerical)
+    num_categorical = dataset.n_cat_features if dataset.n_cat_features > 0 else None
+    noise = get_noise(
+        config.noise,
+        config.numeric_noise,
+        num_numerical=num_numerical,
+        num_categorical=num_categorical,
+    )
 
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model"])
@@ -136,18 +149,19 @@ def main() -> None:
     ema.copy_to(model.parameters())
     model.eval()
 
-    samples = sample_block_uniform(
-        model=model,
-        graph=graph,
-        noise=noise,
-        num_samples=num_samples,
-        steps=config.sampling.steps,
-        predictor=config.sampling.predictor,
-        denoise=config.sampling.noise_removal,
-        eps=1e-5,
-        device=device,
-        numeric_clip=generation_cfg.numeric_clip,
-    )
+    with torch.no_grad():
+        samples = sample_block_uniform(
+            model=model,
+            graph=graph,
+            noise=noise,
+            num_samples=num_samples,
+            steps=config.sampling.steps,
+            predictor=config.sampling.predictor,
+            denoise=config.sampling.noise_removal,
+            eps=1e-5,
+            device=device,
+            numeric_clip=generation_cfg.numeric_clip,
+        )
 
     if isinstance(samples, tuple):
         tokens, numeric = samples

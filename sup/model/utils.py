@@ -35,7 +35,14 @@ def get_model_fn(model, train=False):
             model.eval()
 
             # otherwise output the raw values (we handle mlm training in losses.py)
-        return model(x, sigma)
+        if sigma is not None and hasattr(sigma, "ndim") and sigma.ndim > 1:
+            if sigma.shape[-1] == 1:
+                sigma_embed = sigma.reshape(sigma.shape[0])
+            else:
+                sigma_embed = sigma.mean(dim=-1)
+        else:
+            sigma_embed = sigma
+        return model(x, sigma_embed)
 
     return model_fn
 
@@ -51,7 +58,6 @@ def get_score_fn(model, train=False, sampling=False, discrete_dim: Optional[int]
 
     with autocast_ctx(dtype=torch.bfloat16) if torch.cuda.is_available() else nullcontext():
         def score_fn(x, sigma):
-            sigma = sigma.reshape(-1)
             score = model_fn(x, sigma)
 
             if sampling:

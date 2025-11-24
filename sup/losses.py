@@ -81,7 +81,11 @@ def get_loss_fn(noise, graph, train, sampling_eps=1e-3, lv=False):
         if graph.dim > 0:
             discrete_out = model_out[:, :graph.dim]
             cat_loss = graph.score_entropy(discrete_out, sigma_cat, perturbed_global, tokens_global)
-            loss_total = loss_total + dsigma_cat.view(-1) * cat_loss
+            if dsigma_cat.ndim > 1:
+                cat_weights = dsigma_cat.mean(dim=-1)
+            else:
+                cat_weights = dsigma_cat
+            loss_total = loss_total + cat_weights.view(-1) * cat_loss
 
         if has_numeric:
             numeric_out = model_out[:, graph.dim:] if graph.dim > 0 else model_out

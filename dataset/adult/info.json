@@ -1,0 +1,46 @@
+{
+  "task_type": "binclass",
+  "n_classes": 2,
+  "n_num_features": 6,
+  "n_cat_features": 8,
+  "train_size": 29304,
+  "val_size": 3257,
+  "test_size": 16281,
+  "cat_group_sizes": [
+    9,
+    16,
+    7,
+    15,
+    6,
+    5,
+    2,
+    42
+  ],
+  "categorical_columns": [
+    "workclass",
+    "education",
+    "marital_status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "native_country"
+  ],
+  "numeric_columns": [
+    "age",
+    "fnlwgt",
+    "education_num",
+    "capital_gain",
+    "capital_loss",
+    "hours_per_week"
+  ],
+  "target": "income",
+  "target_classes": [
+    "0",
+    "1"
+  ],
+  "random_state": 777,
+  "val_ratio": 0.06668441095778224,
+  "test_ratio": 0.33334015806068545,
+  "name": "adult"
+}

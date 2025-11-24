@@ -503,31 +503,72 @@ class ResNetDiffusion(nn.Module):
 
 
 class MLPDiffusionTest(nn.Module):
-    def __init__(self, d_in, num_classes, is_y_cond, rtdl_params, dim_t=128):
+    def __init__(self, d_in, num_classes, is_y_cond, rtdl_params, dim_t=128, transformer_params=None):
         super().__init__()
         self.input_dim = d_in  # F = feature count
         self.dim_t = dim_t
         self.num_classes = num_classes
         self.is_y_cond = is_y_cond
 
+        tp = dict(transformer_params) if transformer_params is not None else {}
+        self.d_embed = tp.get("d_embed", 32)
+        nhead = tp.get("nhead", 4)
+        dim_feedforward = tp.get("dim_feedforward", 128)
+        num_layers = tp.get("num_layers", 2)
+        dropout = tp.get("dropout", 0.0)
+        self.value_scale = tp.get("value_scale", 0.01)
+        # Optional learned scale for value injection
+        if tp.get("trainable_value_scale", False):
+            self.value_scale_param = nn.Parameter(torch.tensor(float(self.value_scale)))
+        else:
+            self.value_scale_param = None
+
+        # Optional positional/group embeddings for better feature structure encoding
+        self.use_pos_emb = tp.get("use_pos_emb", True)
+        self.use_group_emb = tp.get("use_group_emb", False)
+        # group_ids: list[int] per feature index; if not provided, group embedding is skipped
+        group_ids = tp.get("group_ids")
+        numeric_dim = tp.get("numeric_dim")
+        if group_ids is not None:
+            if len(group_ids) != d_in:
+                raise ValueError("group_ids length must match d_in")
+            self.register_buffer("group_ids", torch.tensor(group_ids, dtype=torch.long))
+            self.n_groups = int(torch.tensor(group_ids).max().item() + 1)
+        elif self.use_group_emb and numeric_dim is not None:
+            cat_dim = d_in - int(numeric_dim)
+            if cat_dim < 0:
+                raise ValueError("numeric_dim exceeds total input dim")
+            gids = [0] * cat_dim + [1] * int(numeric_dim)
+            self.register_buffer("group_ids", torch.tensor(gids, dtype=torch.long))
+            self.n_groups = 2
+        else:
+            self.group_ids = None
+            self.n_groups = 0
+
         # 1) Column Tokenizer
         # tabular feature 각각 하나씩 token으로 취급
 
-        self.d_embed = 32  # column embedding dimension (작게 유지)
         # 컬럼 인덱스에 대해 그 컬럼을 대표하는 토큰 벡터 생성
-        self.column_emb = nn.Parameter(
-            torch.randn(d_in, self.d_embed) * 0.02
-        )  # shape: [F, d_embed]
+        self.column_emb = nn.Parameter(torch.randn(d_in, self.d_embed) * 0.02)  # shape: [F, d_embed]
+        if self.use_pos_emb:
+            self.pos_emb = nn.Parameter(torch.randn(d_in, self.d_embed) * 0.02)
+        else:
+            self.register_parameter("pos_emb", None)
+        if self.use_group_emb and self.group_ids is not None:
+            self.group_emb = nn.Embedding(self.n_groups, self.d_embed)
+        else:
+            self.register_parameter("group_emb", None)
 
         # 2) Transformer Encoder
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=self.d_embed,
-            nhead=4,
-            dim_feedforward=128,
+            nhead=nhead,
+            dim_feedforward=dim_feedforward,
             batch_first=True,
             activation="gelu",
+            dropout=dropout,
         )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=2)
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         # 3) 기존 MLP Head
 
@@ -576,9 +617,15 @@ class MLPDiffusionTest(nn.Module):
         # column_emb: [F, d]
         # expand → [B, F, d]
         col_tok = self.column_emb.unsqueeze(0).expand(B, -1, -1)
+        if self.pos_emb is not None:
+            col_tok = col_tok + self.pos_emb.unsqueeze(0)
+        if self.group_emb is not None and self.group_ids is not None:
+            group_vec = self.group_emb(self.group_ids.to(device))  # [F, d_embed]
+            col_tok = col_tok + group_vec.unsqueeze(0)
 
         # continuous value injection (작게 scaling)
-        col_tok = col_tok + x.unsqueeze(-1) * 0.01
+        scale = self.value_scale_param if self.value_scale_param is not None else self.value_scale
+        col_tok = col_tok + x.unsqueeze(-1) * scale
 
         # Step 3: Transformer Encoding (column-wise)
 

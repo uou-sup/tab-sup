@@ -67,6 +67,10 @@ class NoiseConfig:
     sigma_min: float = 1e-3
     sigma_max: float = 1.0
     eps: float = 1e-3
+    eps_min: float = 1e-5
+    eps_max: float = 1e-3
+    k_init: float = -6.0
+    k_offset: float = 1.0
     rho: float = 7.0
     rho_init: float = 1.0
     rho_offset: float = 2.0
@@ -79,6 +83,7 @@ class ModelConfig:
     dim_t: int = 128
     num_classes: Optional[int] = None
     rtdl_params: Dict[str, Any] = field(default_factory=dict)
+    transformer_params: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -201,6 +206,15 @@ def build_model(cfg: ModelConfig, dataset: Dataset, input_dim: int) -> torch.nn.
             rtdl_params=rtdl_params,
             dim_t=cfg.dim_t,
         )
+    elif model_type == "transformer":
+        return model_modules.MLPDiffusionTest(
+            d_in=input_dim,
+            num_classes=num_classes,
+            is_y_cond=cfg.is_y_cond,
+            rtdl_params=rtdl_params,
+            dim_t=cfg.dim_t,
+            transformer_params=cfg.transformer_params,
+        )
     ### add DiT Block style
     else:
         raise ValueError(f"Unknown model type: {cfg.type}")
@@ -305,7 +319,13 @@ def train(config: Config) -> None:
         wandb.watch(model, log="gradients", log_freq=config.train.log_every)
 
     num_numerical = dataset.n_num_features if dataset.n_num_features > 0 else None
-    noise = get_noise(config.noise, config.numeric_noise, num_numerical=num_numerical)
+    num_categorical = dataset.n_cat_features if dataset.n_cat_features > 0 else None
+    noise = get_noise(
+        config.noise,
+        config.numeric_noise,
+        num_numerical=num_numerical,
+        num_categorical=num_categorical,
+    )
 
     optimizer = get_optimizer(config, model.parameters())
     ema = ExponentialMovingAverage(model.parameters(), config.train.ema_decay)

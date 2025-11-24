@@ -5,14 +5,34 @@ import numpy as np
 from typing import Optional, Tuple
 
 
-def _build_noise(cfg, num_numerical: Optional[int] = None):
+def _build_noise(
+    cfg,
+    num_numerical: Optional[int] = None,
+    num_categorical: Optional[int] = None,
+):
     if cfg is None:
         return None
     noise_type = cfg.type.lower()
     if noise_type == 'geometric':
         return GeometricNoise(cfg.sigma_min, cfg.sigma_max)
     elif noise_type == 'loglinear':
-        return LogLinearNoise(eps=cfg.eps)
+        eps_max = getattr(cfg, "eps_max", getattr(cfg, "eps", 1e-3))
+        eps_min = getattr(cfg, "eps_min", 1e-5)
+        return LogLinearNoise(eps_max=eps_max, eps_min=eps_min)
+    elif noise_type == 'loglinear_per_column':
+        if num_categorical is None:
+            raise ValueError("loglinear_per_column noise requires the number of categorical features.")
+        eps_max = getattr(cfg, "eps_max", getattr(cfg, "eps", 1e-3))
+        eps_min = getattr(cfg, "eps_min", 1e-5)
+        k_init = getattr(cfg, "k_init", -6.0)
+        k_offset = getattr(cfg, "k_offset", 1.0)
+        return LogLinearNoise_PerColumn(
+            num_categories=int(num_categorical),
+            eps_max=eps_max,
+            eps_min=eps_min,
+            k_init=k_init,
+            k_offset=k_offset,
+        )
     elif noise_type == 'power_mean':
         return PowerMeanNoise(cfg.sigma_min, cfg.sigma_max, cfg.rho)
     elif noise_type == 'power_mean_per_column':
@@ -29,8 +49,13 @@ def _build_noise(cfg, num_numerical: Optional[int] = None):
         raise ValueError(f"{cfg.type} is not a valid noise")
 
 
-def get_noise(config, numeric_config: Optional[object] = None, num_numerical: Optional[int] = None):
-    categorical_noise = _build_noise(config, num_numerical=None)
+def get_noise(
+    config,
+    numeric_config: Optional[object] = None,
+    num_numerical: Optional[int] = None,
+    num_categorical: Optional[int] = None,
+):
+    categorical_noise = _build_noise(config, num_categorical=num_categorical)
     numeric_noise = _build_noise(numeric_config, num_numerical=num_numerical)
     if categorical_noise is None:
         raise ValueError("Categorical noise configuration must be provided.")
@@ -82,23 +107,27 @@ class GeometricNoise(Noise, nn.Module):
 
 
 class LogLinearNoise(Noise, nn.Module):
-    """
-    Log Linear noise schedule built so that 1 - 1/e^(n(t)) interpolates between 0 and ~1
-    when t goes from 0 to 1. Used for absorbing
+    """Log Linear noise schedule."""
 
-    Total noise is -log(1 - (1 - eps) * t), so the sigma will be (1 - eps) * t
-    """
-
-    def __init__(self, eps=1e-3):
+    def __init__(self, eps_max=1e-3, eps_min=1e-5, **kwargs):
         super().__init__()
-        self.eps = eps
-        self.empty = nn.Parameter(torch.tensor(0.0))
+        self.eps_max = eps_max
+        self.eps_min = eps_min
+        self.sigma_max = self.total_noise(torch.tensor(1.0))
+        self.sigma_min = self.total_noise(torch.tensor(0.0))
+
+    def k(self):
+        return torch.tensor(1)
 
     def rate_noise(self, t):
-        return (1 - self.eps) / (1 - (1 - self.eps) * t)
+        return (1 - self.eps_max - self.eps_min) / (1 - ((1 - self.eps_max - self.eps_min) * t + self.eps_min))
 
     def total_noise(self, t):
-        return -torch.log1p(-(1 - self.eps) * t)
+        """
+        sigma_min = -log(1-eps_min), when t=0
+        sigma_max = -log(eps_max), when t = 1
+        """
+        return -torch.log1p(-((1 - self.eps_max - self.eps_min) * t + self.eps_min))
 
 
 class PowerMeanNoise(Noise):
@@ -107,6 +136,7 @@ class PowerMeanNoise(Noise):
 
     This is the schedule used in EDM
     """
+
     def __init__(self, sigma_min=0.002, sigma_max=80, rho=7, **kwargs):
         super().__init__()
         self.sigma_min = sigma_min
@@ -114,12 +144,12 @@ class PowerMeanNoise(Noise):
         self.raw_rho = rho
 
     def rho(self):
-            # Return the softplus-transformed rho for all num_numerical values
+        # Return the softplus-transformed rho for all num_numerical values
         return torch.tensor(self.raw_rho)
 
     def total_noise(self, t):
-        sigma = (self.sigma_min ** (1/self.rho()) + t * (
-            self.sigma_max ** (1/self.rho()) - self.sigma_min ** (1/self.rho()))).pow(self.rho())
+        sigma = (self.sigma_min ** (1 / self.rho()) + t * (
+                self.sigma_max ** (1 / self.rho()) - self.sigma_min ** (1 / self.rho()))).pow(self.rho())
         return sigma
 
     def rate_noise(self, t):
@@ -172,13 +202,13 @@ class HybridNoise(nn.Module):
 class PowerMeanNoise_PerColumn(Noise):
 
     def __init__(
-        self,
-        num_numerical: int,
-        sigma_min: float = 0.002,
-        sigma_max: float = 80,
-        rho_init: float = 1.0,
-        rho_offset: float = 2.0,
-        **kwargs,
+            self,
+            num_numerical: int,
+            sigma_min: float = 0.002,
+            sigma_max: float = 80,
+            rho_init: float = 1.0,
+            rho_offset: float = 2.0,
+            **kwargs,
     ):
         super().__init__()
         if num_numerical <= 0:
@@ -202,7 +232,7 @@ class PowerMeanNoise_PerColumn(Noise):
         return t
 
     def _sigma_bounds(
-        self, device: torch.device, rho: torch.Tensor
+            self, device: torch.device, rho: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         sigma_min = torch.tensor(self.sigma_min, device=device, dtype=rho.dtype)
         sigma_max = torch.tensor(self.sigma_max, device=device, dtype=rho.dtype)
@@ -229,3 +259,51 @@ class PowerMeanNoise_PerColumn(Noise):
         sigma = sigma.to(rho.device)
         sigma_min_pow, sigma_max_pow = self._sigma_bounds(sigma.device, rho)
         return (sigma.pow(1 / rho) - sigma_min_pow) / (sigma_max_pow - sigma_min_pow)
+
+
+class LogLinearNoise_PerColumn(Noise):
+    def __init__(
+        self,
+        num_categories: int,
+        eps_max: float = 1e-3,
+        eps_min: float = 1e-5,
+        k_init: float = -6.0,
+        k_offset: float = 1.0,
+        **kwargs,
+    ):
+        super().__init__()
+        if num_categories <= 0:
+            raise ValueError("num_categories must be positive for loglinear_per_column noise.")
+        self.num_categories = int(num_categories)
+        self.eps_max = float(eps_max)
+        self.eps_min = float(eps_min)
+        self.k_offset = float(k_offset)
+        self.k_raw = nn.Parameter(torch.full((self.num_categories,), float(k_init), dtype=torch.float32))
+
+    def k(self) -> torch.Tensor:
+        return torch.nn.functional.softplus(self.k_raw) + self.k_offset
+
+    def _prep_t(self, t: torch.Tensor) -> torch.Tensor:
+        t = t.to(self.k_raw.device, dtype=self.k_raw.dtype)
+        if t.ndim == 1:
+            t = t.unsqueeze(-1)
+        return t
+
+    def _broadcast_k(self, t: torch.Tensor) -> torch.Tensor:
+        k = self.k().to(t.device)
+        while k.ndim < t.ndim:
+            k = k.unsqueeze(0)
+        return k
+
+    def rate_noise(self, t: torch.Tensor):
+        t = self._prep_t(t)
+        k = self._broadcast_k(t)
+        numerator = (1 - self.eps_max - self.eps_min) * k * torch.pow(t, k - 1)
+        denominator = 1 - ((1 - self.eps_max - self.eps_min) * torch.pow(t, k) + self.eps_min)
+        return numerator / denominator
+
+    def total_noise(self, t: torch.Tensor):
+        t = self._prep_t(t)
+        k = self._broadcast_k(t)
+        inner = (1 - self.eps_max - self.eps_min) * torch.pow(t, k) + self.eps_min
+        return -torch.log1p(-inner)

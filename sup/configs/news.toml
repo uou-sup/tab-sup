@@ -1,0 +1,72 @@
+[dataset]
+path = "dataset/news"
+cache = true
+batch_size = 256
+shuffle = true
+num_workers = 0
+drop_last = false
+
+[transformations]
+seed = 0
+cat_encoding = "__none__"
+cat_nan_policy = "new_category"
+num_nan_policy = "mean"
+normalization = "standard"
+y_policy = "default"
+int_dequant_dist = "uniform"
+
+[graph]
+type = "block_uniform"
+
+[noise]
+type = "geometric"
+sigma_min = 1e-3
+sigma_max = 1.0
+
+[numeric_noise]
+type = "power_mean"
+sigma_min = 0.002
+sigma_max = 80.0
+rho = 7.0
+
+[model]
+type = "mlp"
+is_y_cond = false
+dim_t = 128
+
+[model.rtdl_params]
+d_layers = [512, 512, 512]
+dropout = 0.1
+
+[optim]
+optimizer = "AdamW"
+lr = 2e-4
+beta1 = 0.9
+beta2 = 0.999
+eps = 1e-8
+weight_decay = 1e-5
+warmup = 500
+grad_clip = 1.0
+
+[train]
+epochs = 300
+grad_accum = 1
+log_every = 50
+eval_every = 500
+checkpoint_every = 1000
+checkpoint_dir = "sup/checkpoints/news"
+ema_decay = 0.999
+seed = 777
+max_steps = 0
+use_wandb = false
+
+[sampling]
+predictor = "analytic"
+steps = 100
+noise_removal = true
+
+[generation]
+checkpoint = "sup/checkpoints/news/best.pt"
+num_samples = 1000
+output = "samples/news_generated.csv"
+numeric_clip = 3.0

@@ -1,0 +1,75 @@
+dataset:
+  path: dataset/shoppers
+  cache: true
+  batch_size: 256
+  shuffle: true
+  num_workers: 0
+  drop_last: false
+
+transformations:
+  seed: 0
+  cat_encoding: null
+  cat_nan_policy: new_category
+  num_nan_policy: mean
+  normalization: quantile
+  y_policy: default
+  int_dequant_dist: uniform
+
+graph:
+  type: block_absorb
+
+noise:
+  type: loglinear
+  eps: 0.001
+
+numeric_noise:
+  type: power_mean_per_column
+  sigma_min: 0.002
+  sigma_max: 80.0
+  rho: 7.0
+
+model:
+  type: mlp
+  is_y_cond: false
+  dim_t: 128
+  rtdl_params:
+    d_layers: [256, 256]
+    dropout: 0.1
+
+optim:
+  optimizer: AdamW
+  lr: 0.0002
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1.0e-08
+  weight_decay: 1.0e-05
+  warmup: 50
+  grad_clip: 1.0
+
+train:
+  epochs: 500
+  grad_accum: 2
+  log_every: 50
+  eval_every: 100
+  checkpoint_every: 100
+  checkpoint_dir: sup/checkpoints/shoppers_wandb
+  ema_decay: 0.995
+  seed: 777
+  device: cpu
+  use_wandb: true
+  wandb_project: tab-sup-dev
+  wandb_run_name: shoppers-yaml-test
+  wandb_start_method: thread
+  wandb_mode: online
+  max_steps: 0
+
+sampling:
+  predictor: analytic
+  steps: 20
+  noise_removal: true
+
+generation:
+  checkpoint: sup/checkpoints/shoppers_wandb/epoch_0050.pt
+  num_samples: 12330
+  output: samples/shoppers_yaml_check.csv
+  numeric_clip: 2.0

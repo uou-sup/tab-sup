@@ -1,0 +1,369 @@
+{
+  "name": "default",
+  "task_type": "binclass",
+  "header": "infer",
+  "column_names": [
+    "limit_bal",
+    "sex",
+    "education",
+    "marriage",
+    "age",
+    "pay_0",
+    "pay_2",
+    "pay_3",
+    "pay_4",
+    "pay_5",
+    "pay_6",
+    "bill_amt1",
+    "bill_amt2",
+    "bill_amt3",
+    "bill_amt4",
+    "bill_amt5",
+    "bill_amt6",
+    "pay_amt1",
+    "pay_amt2",
+    "pay_amt3",
+    "pay_amt4",
+    "pay_amt5",
+    "pay_amt6",
+    "default_payment_next_month"
+  ],
+  "num_col_idx": [
+    0,
+    4,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "cat_col_idx": [
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+  ],
+  "target_col_idx": [
+    23
+  ],
+  "file_type": "csv",
+  "data_path": "data/default/train.csv",
+  "val_path": null,
+  "test_path": "data/default/test.csv",
+  "int_col_idx": [
+    0,
+    4,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "int_columns": [
+    "limit_bal",
+    "age",
+    "bill_amt1",
+    "bill_amt2",
+    "bill_amt3",
+    "bill_amt4",
+    "bill_amt5",
+    "bill_amt6"
+  ],
+  "int_col_idx_wrt_num": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "column_info": {
+    "0": {
+      "type": "numerical",
+      "min": 10000.0,
+      "max": 1000000.0
+    },
+    "1": {
+      "type": "categorical"
+    },
+    "2": {
+      "type": "categorical"
+    },
+    "3": {
+      "type": "categorical"
+    },
+    "4": {
+      "type": "numerical",
+      "min": 21.0,
+      "max": 79.0
+    },
+    "5": {
+      "type": "categorical"
+    },
+    "6": {
+      "type": "categorical"
+    },
+    "7": {
+      "type": "categorical"
+    },
+    "8": {
+      "type": "categorical"
+    },
+    "9": {
+      "type": "categorical"
+    },
+    "10": {
+      "type": "categorical"
+    },
+    "11": {
+      "type": "numerical",
+      "min": -165580.0,
+      "max": 964511.0
+    },
+    "12": {
+      "type": "numerical",
+      "min": -69777.0,
+      "max": 983931.0
+    },
+    "13": {
+      "type": "numerical",
+      "min": -157264.0,
+      "max": 1664089.0
+    },
+    "14": {
+      "type": "numerical",
+      "min": -170000.0,
+      "max": 891586.0
+    },
+    "15": {
+      "type": "numerical",
+      "min": -81334.0,
+      "max": 927171.0
+    },
+    "16": {
+      "type": "numerical",
+      "min": -339603.0,
+      "max": 961664.0
+    },
+    "17": {
+      "type": "categorical"
+    },
+    "18": {
+      "type": "categorical"
+    },
+    "19": {
+      "type": "categorical"
+    },
+    "20": {
+      "type": "categorical"
+    },
+    "21": {
+      "type": "categorical"
+    },
+    "22": {
+      "type": "categorical"
+    },
+    "23": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "train_num": 24000,
+  "test_num": 6000,
+  "val_num": 0,
+  "idx_mapping": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 17,
+    "18": 18,
+    "19": 19,
+    "20": 20,
+    "21": 21,
+    "22": 22,
+    "23": 23
+  },
+  "inverse_idx_mapping": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 17,
+    "18": 18,
+    "19": 19,
+    "20": 20,
+    "21": 21,
+    "22": 22,
+    "23": 23
+  },
+  "idx_name_mapping": {
+    "0": "limit_bal",
+    "1": "sex",
+    "2": "education",
+    "3": "marriage",
+    "4": "age",
+    "5": "pay_0",
+    "6": "pay_2",
+    "7": "pay_3",
+    "8": "pay_4",
+    "9": "pay_5",
+    "10": "pay_6",
+    "11": "bill_amt1",
+    "12": "bill_amt2",
+    "13": "bill_amt3",
+    "14": "bill_amt4",
+    "15": "bill_amt5",
+    "16": "bill_amt6",
+    "17": "pay_amt1",
+    "18": "pay_amt2",
+    "19": "pay_amt3",
+    "20": "pay_amt4",
+    "21": "pay_amt5",
+    "22": "pay_amt6",
+    "23": "default_payment_next_month"
+  },
+  "metadata": {
+    "columns": {
+      "0": {
+        "sdtype": "numerical",
+        "name": "limit_bal"
+      },
+      "1": {
+        "sdtype": "categorical",
+        "name": "sex"
+      },
+      "2": {
+        "sdtype": "categorical",
+        "name": "education"
+      },
+      "3": {
+        "sdtype": "categorical",
+        "name": "marriage"
+      },
+      "4": {
+        "sdtype": "numerical",
+        "name": "age"
+      },
+      "5": {
+        "sdtype": "categorical",
+        "name": "pay_0"
+      },
+      "6": {
+        "sdtype": "categorical",
+        "name": "pay_2"
+      },
+      "7": {
+        "sdtype": "categorical",
+        "name": "pay_3"
+      },
+      "8": {
+        "sdtype": "categorical",
+        "name": "pay_4"
+      },
+      "9": {
+        "sdtype": "categorical",
+        "name": "pay_5"
+      },
+      "10": {
+        "sdtype": "categorical",
+        "name": "pay_6"
+      },
+      "11": {
+        "sdtype": "numerical",
+        "name": "bill_amt1"
+      },
+      "12": {
+        "sdtype": "numerical",
+        "name": "bill_amt2"
+      },
+      "13": {
+        "sdtype": "numerical",
+        "name": "bill_amt3"
+      },
+      "14": {
+        "sdtype": "numerical",
+        "name": "bill_amt4"
+      },
+      "15": {
+        "sdtype": "numerical",
+        "name": "bill_amt5"
+      },
+      "16": {
+        "sdtype": "numerical",
+        "name": "bill_amt6"
+      },
+      "17": {
+        "sdtype": "categorical",
+        "name": "pay_amt1"
+      },
+      "18": {
+        "sdtype": "categorical",
+        "name": "pay_amt2"
+      },
+      "19": {
+        "sdtype": "categorical",
+        "name": "pay_amt3"
+      },
+      "20": {
+        "sdtype": "categorical",
+        "name": "pay_amt4"
+      },
+      "21": {
+        "sdtype": "categorical",
+        "name": "pay_amt5"
+      },
+      "22": {
+        "sdtype": "categorical",
+        "name": "pay_amt6"
+      },
+      "23": {
+        "sdtype": "numerical",
+        "name": "default_payment_next_month"
+      }
+    },
+    "problem_type": "classification"
+  }
+}

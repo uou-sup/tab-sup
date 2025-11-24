@@ -156,7 +156,7 @@ class Dataset:
 
     @property
     def n_cat_features(self) -> int:
-        return 0 if self.X_cat is None else self.X_num['train'].shape[1]
+        return 0 if self.X_cat is None else self.X_cat['train'].shape[1]
 
     @property
     def n_features(self) -> int:

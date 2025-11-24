@@ -750,7 +750,14 @@ class BlockAbsorbing(Graph):
 
     def score_entropy(self, score, sigma, x, x0):
         device = score.device
-        sigma = sigma.reshape(-1)
+        if sigma.ndim == 1:
+            sigma_groups = sigma.view(-1, 1).expand(-1, self.num_groups)
+        elif sigma.ndim == 2:
+            if sigma.shape[1] != self.num_groups:
+                raise ValueError("sigma second dimension must match number of categorical groups.")
+            sigma_groups = sigma
+        else:
+            raise ValueError("sigma must be 1D or 2D for BlockAbsorbing graphs.")
         entropy = torch.zeros(score.shape[0], device=device, dtype=score.dtype)
 
         for idx, base_size in enumerate(self._base_sizes_list):
@@ -761,7 +768,7 @@ class BlockAbsorbing(Graph):
             score_slice = score[:, start:start + size]
             x_local = x[:, idx] - start
             x0_local = x0[:, idx] - start
-
-            entropy += absorber.score_entropy(score_slice, sigma, x_local, x0_local)
+            sigma_slice = sigma_groups[:, idx]
+            entropy += absorber.score_entropy(score_slice, sigma_slice, x_local, x0_local)
 
         return entropy

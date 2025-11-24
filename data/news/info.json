@@ -1,0 +1,875 @@
+{
+  "name": "news",
+  "task_type": "regression",
+  "header": "infer",
+  "column_names": [
+    "timedelta",
+    "n_tokens_title",
+    "n_tokens_content",
+    "n_unique_tokens",
+    "n_non_stop_words",
+    "n_non_stop_unique_tokens",
+    "num_hrefs",
+    "num_self_hrefs",
+    "num_imgs",
+    "num_videos",
+    "average_token_length",
+    "num_keywords",
+    "data_channel_is_lifestyle",
+    "data_channel_is_entertainment",
+    "data_channel_is_bus",
+    "data_channel_is_socmed",
+    "data_channel_is_tech",
+    "data_channel_is_world",
+    "kw_min_min",
+    "kw_max_min",
+    "kw_avg_min",
+    "kw_min_max",
+    "kw_max_max",
+    "kw_avg_max",
+    "kw_min_avg",
+    "kw_max_avg",
+    "kw_avg_avg",
+    "self_reference_min_shares",
+    "self_reference_max_shares",
+    "self_reference_avg_sharess",
+    "weekday_is_monday",
+    "weekday_is_tuesday",
+    "weekday_is_wednesday",
+    "weekday_is_thursday",
+    "weekday_is_friday",
+    "weekday_is_saturday",
+    "weekday_is_sunday",
+    "is_weekend",
+    "LDA_00",
+    "LDA_01",
+    "LDA_02",
+    "LDA_03",
+    "LDA_04",
+    "global_subjectivity",
+    "global_sentiment_polarity",
+    "global_rate_positive_words",
+    "global_rate_negative_words",
+    "rate_positive_words",
+    "rate_negative_words",
+    "avg_positive_polarity",
+    "min_positive_polarity",
+    "max_positive_polarity",
+    "avg_negative_polarity",
+    "min_negative_polarity",
+    "max_negative_polarity",
+    "title_subjectivity",
+    "title_sentiment_polarity",
+    "abs_title_subjectivity",
+    "abs_title_sentiment_polarity",
+    "shares"
+  ],
+  "num_col_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58
+  ],
+  "cat_col_idx": [],
+  "target_col_idx": [
+    59
+  ],
+  "file_type": "csv",
+  "data_path": "data/news/train.csv",
+  "val_path": null,
+  "test_path": "data/news/test.csv",
+  "int_col_idx": [],
+  "int_columns": [],
+  "int_col_idx_wrt_num": [],
+  "column_info": {
+    "0": {
+      "type": "numerical",
+      "min": 8.0,
+      "max": 731.0
+    },
+    "1": {
+      "type": "numerical",
+      "min": 2.0,
+      "max": 23.0
+    },
+    "2": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 8474.0
+    },
+    "3": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 701.0
+    },
+    "4": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1042.0
+    },
+    "5": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 650.0
+    },
+    "6": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 304.0
+    },
+    "7": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 116.0
+    },
+    "8": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 128.0
+    },
+    "9": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 91.0
+    },
+    "10": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 8.04153354633
+    },
+    "11": {
+      "type": "numerical",
+      "min": 1.0,
+      "max": 10.0
+    },
+    "12": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "13": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "14": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "15": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "16": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "17": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "18": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 377.0
+    },
+    "19": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 298400.0
+    },
+    "20": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 42827.8571429
+    },
+    "21": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 843300.0
+    },
+    "22": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 843300.0
+    },
+    "23": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 843300.0
+    },
+    "24": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 3613.0398195
+    },
+    "25": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 298400.0
+    },
+    "26": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 43567.6599458
+    },
+    "27": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 843300.0
+    },
+    "28": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 843300.0
+    },
+    "29": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 843300.0
+    },
+    "30": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "31": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "32": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "33": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "34": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "35": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "36": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "37": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "38": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.926994384393
+    },
+    "39": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.925946986138
+    },
+    "40": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.919999088666
+    },
+    "41": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.926533782685
+    },
+    "42": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.927190809258
+    },
+    "43": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "44": {
+      "type": "numerical",
+      "min": -0.39375,
+      "max": 0.727840909091
+    },
+    "45": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.155487804878
+    },
+    "46": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.184931506849
+    },
+    "47": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "48": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "49": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "50": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "51": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "52": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 0.0
+    },
+    "53": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 0.0
+    },
+    "54": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 0.0
+    },
+    "55": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "56": {
+      "type": "numerical",
+      "min": -1.0,
+      "max": 1.0
+    },
+    "57": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 0.5
+    },
+    "58": {
+      "type": "numerical",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "59": {
+      "type": "numerical",
+      "min": 1.0,
+      "max": 843300.0
+    }
+  },
+  "train_num": 31715,
+  "test_num": 7929,
+  "val_num": 0,
+  "idx_mapping": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 17,
+    "18": 18,
+    "19": 19,
+    "20": 20,
+    "21": 21,
+    "22": 22,
+    "23": 23,
+    "24": 24,
+    "25": 25,
+    "26": 26,
+    "27": 27,
+    "28": 28,
+    "29": 29,
+    "30": 30,
+    "31": 31,
+    "32": 32,
+    "33": 33,
+    "34": 34,
+    "35": 35,
+    "36": 36,
+    "37": 37,
+    "38": 38,
+    "39": 39,
+    "40": 40,
+    "41": 41,
+    "42": 42,
+    "43": 43,
+    "44": 44,
+    "45": 45,
+    "46": 46,
+    "47": 47,
+    "48": 48,
+    "49": 49,
+    "50": 50,
+    "51": 51,
+    "52": 52,
+    "53": 53,
+    "54": 54,
+    "55": 55,
+    "56": 56,
+    "57": 57,
+    "58": 58,
+    "59": 59
+  },
+  "inverse_idx_mapping": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 17,
+    "18": 18,
+    "19": 19,
+    "20": 20,
+    "21": 21,
+    "22": 22,
+    "23": 23,
+    "24": 24,
+    "25": 25,
+    "26": 26,
+    "27": 27,
+    "28": 28,
+    "29": 29,
+    "30": 30,
+    "31": 31,
+    "32": 32,
+    "33": 33,
+    "34": 34,
+    "35": 35,
+    "36": 36,
+    "37": 37,
+    "38": 38,
+    "39": 39,
+    "40": 40,
+    "41": 41,
+    "42": 42,
+    "43": 43,
+    "44": 44,
+    "45": 45,
+    "46": 46,
+    "47": 47,
+    "48": 48,
+    "49": 49,
+    "50": 50,
+    "51": 51,
+    "52": 52,
+    "53": 53,
+    "54": 54,
+    "55": 55,
+    "56": 56,
+    "57": 57,
+    "58": 58,
+    "59": 59
+  },
+  "idx_name_mapping": {
+    "0": "timedelta",
+    "1": "n_tokens_title",
+    "2": "n_tokens_content",
+    "3": "n_unique_tokens",
+    "4": "n_non_stop_words",
+    "5": "n_non_stop_unique_tokens",
+    "6": "num_hrefs",
+    "7": "num_self_hrefs",
+    "8": "num_imgs",
+    "9": "num_videos",
+    "10": "average_token_length",
+    "11": "num_keywords",
+    "12": "data_channel_is_lifestyle",
+    "13": "data_channel_is_entertainment",
+    "14": "data_channel_is_bus",
+    "15": "data_channel_is_socmed",
+    "16": "data_channel_is_tech",
+    "17": "data_channel_is_world",
+    "18": "kw_min_min",
+    "19": "kw_max_min",
+    "20": "kw_avg_min",
+    "21": "kw_min_max",
+    "22": "kw_max_max",
+    "23": "kw_avg_max",
+    "24": "kw_min_avg",
+    "25": "kw_max_avg",
+    "26": "kw_avg_avg",
+    "27": "self_reference_min_shares",
+    "28": "self_reference_max_shares",
+    "29": "self_reference_avg_sharess",
+    "30": "weekday_is_monday",
+    "31": "weekday_is_tuesday",
+    "32": "weekday_is_wednesday",
+    "33": "weekday_is_thursday",
+    "34": "weekday_is_friday",
+    "35": "weekday_is_saturday",
+    "36": "weekday_is_sunday",
+    "37": "is_weekend",
+    "38": "LDA_00",
+    "39": "LDA_01",
+    "40": "LDA_02",
+    "41": "LDA_03",
+    "42": "LDA_04",
+    "43": "global_subjectivity",
+    "44": "global_sentiment_polarity",
+    "45": "global_rate_positive_words",
+    "46": "global_rate_negative_words",
+    "47": "rate_positive_words",
+    "48": "rate_negative_words",
+    "49": "avg_positive_polarity",
+    "50": "min_positive_polarity",
+    "51": "max_positive_polarity",
+    "52": "avg_negative_polarity",
+    "53": "min_negative_polarity",
+    "54": "max_negative_polarity",
+    "55": "title_subjectivity",
+    "56": "title_sentiment_polarity",
+    "57": "abs_title_subjectivity",
+    "58": "abs_title_sentiment_polarity",
+    "59": "shares"
+  },
+  "metadata": {
+    "columns": {
+      "0": {
+        "sdtype": "numerical",
+        "name": "timedelta"
+      },
+      "1": {
+        "sdtype": "numerical",
+        "name": "n_tokens_title"
+      },
+      "2": {
+        "sdtype": "numerical",
+        "name": "n_tokens_content"
+      },
+      "3": {
+        "sdtype": "numerical",
+        "name": "n_unique_tokens"
+      },
+      "4": {
+        "sdtype": "numerical",
+        "name": "n_non_stop_words"
+      },
+      "5": {
+        "sdtype": "numerical",
+        "name": "n_non_stop_unique_tokens"
+      },
+      "6": {
+        "sdtype": "numerical",
+        "name": "num_hrefs"
+      },
+      "7": {
+        "sdtype": "numerical",
+        "name": "num_self_hrefs"
+      },
+      "8": {
+        "sdtype": "numerical",
+        "name": "num_imgs"
+      },
+      "9": {
+        "sdtype": "numerical",
+        "name": "num_videos"
+      },
+      "10": {
+        "sdtype": "numerical",
+        "name": "average_token_length"
+      },
+      "11": {
+        "sdtype": "numerical",
+        "name": "num_keywords"
+      },
+      "12": {
+        "sdtype": "numerical",
+        "name": "data_channel_is_lifestyle"
+      },
+      "13": {
+        "sdtype": "numerical",
+        "name": "data_channel_is_entertainment"
+      },
+      "14": {
+        "sdtype": "numerical",
+        "name": "data_channel_is_bus"
+      },
+      "15": {
+        "sdtype": "numerical",
+        "name": "data_channel_is_socmed"
+      },
+      "16": {
+        "sdtype": "numerical",
+        "name": "data_channel_is_tech"
+      },
+      "17": {
+        "sdtype": "numerical",
+        "name": "data_channel_is_world"
+      },
+      "18": {
+        "sdtype": "numerical",
+        "name": "kw_min_min"
+      },
+      "19": {
+        "sdtype": "numerical",
+        "name": "kw_max_min"
+      },
+      "20": {
+        "sdtype": "numerical",
+        "name": "kw_avg_min"
+      },
+      "21": {
+        "sdtype": "numerical",
+        "name": "kw_min_max"
+      },
+      "22": {
+        "sdtype": "numerical",
+        "name": "kw_max_max"
+      },
+      "23": {
+        "sdtype": "numerical",
+        "name": "kw_avg_max"
+      },
+      "24": {
+        "sdtype": "numerical",
+        "name": "kw_min_avg"
+      },
+      "25": {
+        "sdtype": "numerical",
+        "name": "kw_max_avg"
+      },
+      "26": {
+        "sdtype": "numerical",
+        "name": "kw_avg_avg"
+      },
+      "27": {
+        "sdtype": "numerical",
+        "name": "self_reference_min_shares"
+      },
+      "28": {
+        "sdtype": "numerical",
+        "name": "self_reference_max_shares"
+      },
+      "29": {
+        "sdtype": "numerical",
+        "name": "self_reference_avg_sharess"
+      },
+      "30": {
+        "sdtype": "numerical",
+        "name": "weekday_is_monday"
+      },
+      "31": {
+        "sdtype": "numerical",
+        "name": "weekday_is_tuesday"
+      },
+      "32": {
+        "sdtype": "numerical",
+        "name": "weekday_is_wednesday"
+      },
+      "33": {
+        "sdtype": "numerical",
+        "name": "weekday_is_thursday"
+      },
+      "34": {
+        "sdtype": "numerical",
+        "name": "weekday_is_friday"
+      },
+      "35": {
+        "sdtype": "numerical",
+        "name": "weekday_is_saturday"
+      },
+      "36": {
+        "sdtype": "numerical",
+        "name": "weekday_is_sunday"
+      },
+      "37": {
+        "sdtype": "numerical",
+        "name": "is_weekend"
+      },
+      "38": {
+        "sdtype": "numerical",
+        "name": "LDA_00"
+      },
+      "39": {
+        "sdtype": "numerical",
+        "name": "LDA_01"
+      },
+      "40": {
+        "sdtype": "numerical",
+        "name": "LDA_02"
+      },
+      "41": {
+        "sdtype": "numerical",
+        "name": "LDA_03"
+      },
+      "42": {
+        "sdtype": "numerical",
+        "name": "LDA_04"
+      },
+      "43": {
+        "sdtype": "numerical",
+        "name": "global_subjectivity"
+      },
+      "44": {
+        "sdtype": "numerical",
+        "name": "global_sentiment_polarity"
+      },
+      "45": {
+        "sdtype": "numerical",
+        "name": "global_rate_positive_words"
+      },
+      "46": {
+        "sdtype": "numerical",
+        "name": "global_rate_negative_words"
+      },
+      "47": {
+        "sdtype": "numerical",
+        "name": "rate_positive_words"
+      },
+      "48": {
+        "sdtype": "numerical",
+        "name": "rate_negative_words"
+      },
+      "49": {
+        "sdtype": "numerical",
+        "name": "avg_positive_polarity"
+      },
+      "50": {
+        "sdtype": "numerical",
+        "name": "min_positive_polarity"
+      },
+      "51": {
+        "sdtype": "numerical",
+        "name": "max_positive_polarity"
+      },
+      "52": {
+        "sdtype": "numerical",
+        "name": "avg_negative_polarity"
+      },
+      "53": {
+        "sdtype": "numerical",
+        "name": "min_negative_polarity"
+      },
+      "54": {
+        "sdtype": "numerical",
+        "name": "max_negative_polarity"
+      },
+      "55": {
+        "sdtype": "numerical",
+        "name": "title_subjectivity"
+      },
+      "56": {
+        "sdtype": "numerical",
+        "name": "title_sentiment_polarity"
+      },
+      "57": {
+        "sdtype": "numerical",
+        "name": "abs_title_subjectivity"
+      },
+      "58": {
+        "sdtype": "numerical",
+        "name": "abs_title_sentiment_polarity"
+      },
+      "59": {
+        "sdtype": "numerical",
+        "name": "shares"
+      }
+    },
+    "problem_type": "regression"
+  }
+}
